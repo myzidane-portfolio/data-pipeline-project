@@ -1,0 +1,7 @@
+requests
+pandas
+streamlit
+python-dateutil
+jupyter
+ipykernel
+matplotlib
