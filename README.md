@@ -1,80 +1,162 @@
 # 🚀 Cryptocurrency Data Pipeline (JSON-Based ETL)
 
-A complete **end-to-end data pipeline project** that extracts real-time cryptocurrency market data, transforms it into a clean analytical format, and serves it through an interactive **Streamlit dashboard**. This project is designed as a **portfolio-ready data engineering project**, demonstrating modern ETL practices using **JSON data**, Python scripting, Jupyter notebooks, and lightweight analytics visualization.
+A complete **end-to-end cryptocurrency data pipeline** that extracts market data from a public API, transforms raw JSON into a clean analytical format, and delivers insights through an interactive **Streamlit dashboard**. This project is designed as a **portfolio-ready data engineering project**, demonstrating modern ETL practices using **JSON-based data processing**, Python scripting, Jupyter notebooks, and **CI/CD automation with GitHub Actions**.
+
+---
 
 ## 📌 Project Overview
 
-This repository implements a **three-stage ETL pipeline**: **Extract** (pull live cryptocurrency data from a public API), **Transform** (clean, standardize, and structure raw JSON data), and **Load** (prepare a final analytics-ready dataset). The final output is consumed by a **Streamlit dashboard** for interactive exploration.
+This repository implements a **three-stage ETL pipeline**: **Extract**, **Transform**, and **Load**.  
+The pipeline automatically pulls cryptocurrency market data, cleans and standardizes the dataset, and prepares it for analytics and visualization. The final output is consumed by a **Streamlit dashboard** for interactive exploration and monitoring.
+
+The project follows **data engineering best practices**, including modular code structure, reproducibility, automated workflows, and version-controlled data outputs.
+
+---
 
 ## 🧱 Project Structure
 
-data-pipeline-project/  
-├── data/  
-│   ├── raw/          Raw JSON data (source of truth)  
-│   ├── processed/    Cleaned and structured JSON  
-│   └── final/        Final analytics-ready JSON  
-├── notebooks/  
-│   ├── 01_extract_data.ipynb  
-│   ├── 02_transform_data.ipynb  
-│   └── 03_load_data.ipynb  
-├── scripts/  
-│   ├── extract.py  
-│   ├── transform.py  
-│   └── load.py  
-├── dashboard/  
-│   ├── dashboard.py  Streamlit application  
-│   └── app.py        Optional / legacy file  
-├── venv/             Virtual environment  
-├── requirements.txt  
-└── README.md  
+```text
+data-pipeline-project/
+├── .github/workflows/
+│   └── etl_pipeline.yml        Automated ETL workflow (GitHub Actions)
+│
+├── config/
+│   └── settings.yaml           Centralized configuration
+│
+├── dashboard/
+│   ├── dashboard.py            Streamlit dashboard logic
+│   └── app.py                  Streamlit entry point
+│
+├── data/
+│   ├── raw/                    Raw JSON data (source of truth)
+│   ├── processed/              Cleaned & structured data
+│   ├── final/                  Final analytics-ready dataset
+│   └── .gitkeep
+│
+├── notebooks/
+│   ├── 01_extract_data.ipynb   Extraction exploration
+│   ├── 02_transform_data.ipynb Transformation exploration
+│   └── 03_load_data.ipynb      Load & validation exploration
+│
+├── scripts/
+│   ├── extract.py              Extract layer
+│   ├── transform.py            Transform layer
+│   ├── load.py                 Load layer
+│   └── convert_to_json.py
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
 
 ## 🔄 ETL Pipeline Breakdown
 
-**Extract — Raw Data**  
-Data is sourced from the **CoinGecko public API** and stored in **JSON format** without modification to preserve data integrity. Each extraction produces a **timestamped raw file** for reproducibility (e.g., `data/raw/crypto_raw_YYYYMMDD_HHMMSS.json`).
+### **Extract — Raw Data**
 
-**Transform — Processed Data**  
-The transformation stage parses nested API responses, extracts time-series price data, converts timestamps to readable datetime, standardizes the schema (`timestamp`, `price`), and removes invalid or missing values. The transformation logic is designed to be **robust to API structure changes**. Output files are saved as timestamped JSON (e.g., `data/processed/crypto_processed_YYYYMMDD_HHMMSS.json`).
+Cryptocurrency market data is retrieved from a **public API** and stored in **raw JSON format** without modification to preserve data integrity.  
+Each extraction generates a **timestamped raw file** (e.g. `crypto_raw_YYYYMMDD_HHMMSS.json`) to ensure traceability and reproducibility.
 
-**Load — Final Dataset**  
-The load stage performs lightweight validation and sorting to produce a single analytics-ready dataset used by the dashboard. The final output is saved as `data/final/crypto_final.json`.
+---
+
+### **Transform — Processed Data**
+
+The transformation stage parses nested API responses, normalizes the schema, converts timestamps into readable datetime formats, handles missing or invalid values, and standardizes fields such as **price** and **volume**.  
+The transformation logic is designed to be **robust and reusable**, producing timestamped processed datasets.
+
+---
+
+### **Load — Final Dataset**
+
+The load stage performs lightweight validation and sorting before saving a **final analytics-ready dataset**.  
+This dataset serves as the **single source of truth** for downstream analysis and dashboard visualization.
+
+---
 
 ## 📊 Streamlit Dashboard
 
-The Streamlit dashboard provides interactive price time-series visualization, displays the latest cryptocurrency price, and offers a clean, minimal analytics interface. To run the dashboard:  
-`streamlit run dashboard/dashboard.py`  
-If the dashboard loads successfully, the pipeline is fully operational.
+The Streamlit dashboard enables **interactive exploration** of cryptocurrency price data, including:
+
+- Time-series price visualization  
+- Latest market value display  
+- Clean and minimal analytical interface  
+
+### Run the dashboard locally:
+```bash
+streamlit run dashboard/app.py
+
+If the dashboard loads successfully, the ETL pipeline is fully operational.
 
 ## ⚙️ Setup Instructions
 
-Create and activate a virtual environment, then install dependencies:  
-`python -m venv venv`  
-`source venv/Scripts/activate` (Windows Git Bash)  
-`pip install -r requirements.txt`
+Create and activate a virtual environment, then install dependencies:
+
+```bash
+python -m venv venv
+source venv/Scripts/activate   # Windows Git Bash
+pip install -r requirements.txt
 
 ## ▶️ Run the Pipeline (Scripts)
 
-Execute the ETL pipeline in order to generate fresh JSON data:  
-`python scripts/extract.py`  
-`python scripts/transform.py`  
-`python scripts/load.py`
+Execute the ETL pipeline sequentially to generate fresh JSON data:
+
+python scripts/extract.py
+python scripts/transform.py
+python scripts/load.py
+
+## 🤖 Automation with GitHub Actions
+
+The ETL pipeline is fully automated using **GitHub Actions**.
+
+- Scheduled execution (every **6 hours**)
+- Manual trigger via `workflow_dispatch`
+- Automated dependency installation
+- End-to-end ETL execution
+- Automatic commit of updated datasets
+
+Workflow configuration:
+```text
+.github/workflows/etl_pipeline.yml
 
 ## 📓 Notebook Usage
 
-The `notebooks/` directory mirrors the pipeline logic and is intended for **exploration, debugging, documentation, and demonstration**. Recommended execution order is `01_extract_data.ipynb`, `02_transform_data.ipynb`, then `03_load_data.ipynb`. The notebooks follow the same logic as the scripts with detailed explanations.
+The `notebooks/` directory mirrors the production ETL logic and is intended for **exploration, debugging, documentation, and demonstration**.
+
+Recommended execution order:
+1. `01_extract_data.ipynb`
+2. `02_transform_data.ipynb`
+3. `03_load_data.ipynb`
+
+---
 
 ## 🧠 Key Skills Demonstrated
 
-API data ingestion, JSON-based ETL pipelines, data cleaning and transformation, modular Python scripting, Streamlit dashboard development, reproducible project structure, and professional documentation.
+- API data ingestion
+- JSON-based ETL pipelines
+- Data cleaning and transformation
+- Modular Python scripting
+- CI/CD automation with GitHub Actions
+- Streamlit dashboard development
+- Reproducible and production-ready project structure
+- Professional technical documentation
 
 ## 🚀 Future Improvements
 
-Potential enhancements include multi-cryptocurrency support, database storage (PostgreSQL/SQLite), automated scheduling (cron/Airflow), advanced analytics (returns, volatility), and deployment (Docker/Streamlit Cloud).
+Planned enhancements include:
+
+- Multi-cryptocurrency support
+- Database integration (PostgreSQL / SQLite)
+- Advanced analytics (returns, volatility, indicators)
+- Workflow orchestration with Airflow
+- Containerization with Docker
+- Cloud deployment (Streamlit Cloud / AWS)
+
+---
 
 ## 📜 License
 
 This project is open-source and intended for **educational and portfolio use**.
 
+---
+
 ## 🙌 Author
 
-Built as part of a **data science/data engineering portfolio** to demonstrate practical, real-world ETL and analytics workflows.
+Built as part of a **Data Engineering / Data Science portfolio** to demonstrate practical, real-world ETL automation and analytics workflows.
