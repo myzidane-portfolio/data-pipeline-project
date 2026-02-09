@@ -1,61 +1,198 @@
-# 🚀 `Cryptocurrency Data Pipeline (JSON-Based ETL)`
+# Crypto ETL Pipeline
 
-A complete **end-to-end data pipeline project** that extracts real-time cryptocurrency market data, transforms it into a clean analytical format, and serves it through an interactive **Streamlit dashboard**.
+This repository contains a simple **ETL (Extract, Transform, Load) pipeline** for cryptocurrency data built with **Python** and automated using **GitHub Actions**.
 
-This project is designed as a **portfolio-ready Data Engineering project**, demonstrating modern ETL practices using **JSON data**, Python scripting, Jupyter notebooks, GitHub Actions automation, and lightweight analytics visualization.
+The pipeline is designed to:
 
-## 📌 `Project Overview`
-
-This repository implements a **three-stage ETL pipeline**:
-
-- **Extract** — Retrieve live cryptocurrency data from a public API  
-- **Transform** — Clean, normalize, and standardize raw JSON data  
-- **Load** — Produce a final analytics-ready dataset  
-
-The final dataset is consumed by a **Streamlit dashboard** for interactive time-series analysis and monitoring.
-
-## 🧱 `Project Structure`
-
-```text
-data-pipeline-project/
-├── .github/workflows/
-│   └── etl_pipeline.yml      Automated ETL workflow (GitHub Actions)
-├── config/
-│   └── settings.yaml         Centralized configuration
-├── dashboard/
-│   ├── dashboard.py          Streamlit dashboard logic
-│   └── app.py                Streamlit entry point
-├── data/
-│   ├── raw/                  Raw JSON data (source of truth)
-│   ├── processed/            Cleaned & structured data
-│   └── final/                Final analytics-ready dataset
-├── notebooks/
-│   ├── 01_extract_data.ipynb
-│   ├── 02_transform_data.ipynb
-│   └── 03_load_data.ipynb
-├── scripts/
-│   ├── extract.py
-│   ├── transform.py
-│   ├── load.py
-│   └── convert_to_json.py
-├── requirements.txt
-├── README.md
-└── .gitignore
+* Fetch cryptocurrency data from an external API
+* Clean and transform raw data
+* Store processed results in a local `data/` folder
+* Run automatically on a schedule or manually on demand
 
 ---
 
-### 🔹 BLOK 4 — ETL Pipeline Breakdown
+## 📂 Repository Structure
 
-```markdown
-## 🔄 `ETL Pipeline Breakdown`
+```text
+data-pipeline-project/
+├── .github/
+│   └── workflows/
+│       └── etl_pipeline.yml      # GitHub Actions workflow
+├── config/
+│   └── config.py                 # Configuration (API, parameters, etc.)
+├── data/                          # ETL output (generated files)
+├── scripts/
+│   ├── extract.py                # Extract data from API
+│   ├── transform.py              # Data cleaning & transformation
+│   └── load.py                   # Load / save processed data
+├── venv/                          # Virtual environment (not committed)
+├── .gitignore
+├── README.md
+└── requirements.txt (optional)
+```
 
-### Extract — Raw Data
-Cryptocurrency market data is retrieved from a public API and stored in **raw JSON format** without modification to preserve data integrity.  
-Each extraction generates a **timestamped raw file** (e.g. `crypto_raw_YYYYMMDD_HHMMSS.json`) to ensure traceability and reproducibility.
+---
 
-### Transform — Processed Data
-The transformation stage parses nested API responses, normalizes the schema, converts timestamps into readable datetime formats, handles missing or invalid values, and standardizes key fields such as price and volume.  
-Processed outputs are saved as **timestamped JSON datasets**.
+## ⚙️ Pipeline Overview
 
-### Load — Final Dataset
-The load stage performs lightweight validation and sorting before saving a **final analytics-ready dataset**, which serves as the single source of truth for downstream analysis and dashboard visualization.
+1. **Extract**
+   Retrieves cryptocurrency data (e.g. price, volume, market cap) from an API.
+
+2. **Transform**
+   Cleans the data, normalizes formats, and prepares the final dataset.
+
+3. **Load**
+   Saves the transformed data into the `data/` directory (CSV / JSON).
+
+The pipeline can be executed:
+
+* Automatically every **6 hours** (cron schedule)
+* Manually via **GitHub Actions → Run workflow**
+
+---
+
+## 🤖 GitHub Actions Workflow
+
+The main workflow file is located at:
+
+```
+.github/workflows/etl_pipeline.yml
+```
+
+### Triggers
+
+```yaml
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+```
+
+---
+
+## 🔁 Auto Commit (ON / OFF Toggle)
+
+This pipeline supports **optional automatic commits** of ETL results, which can be **enabled or disabled using a single toggle**.
+
+### Configuration
+
+In the workflow file:
+
+```yaml
+env:
+  ENABLE_AUTO_COMMIT: "false"
+```
+
+| Value     | Behavior                                     |
+| --------- | -------------------------------------------- |
+| `"false"` | ❌ No automatic commit (default, recommended) |
+| `"true"`  | ✅ Automatically commits the `data/` folder   |
+
+### Why is it disabled by default?
+
+* Scheduled ETL jobs often **produce no new data**
+* Prevents unnecessary GitHub Actions failures
+* Avoids excessive automated commits
+
+---
+
+## ▶️ Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/<username>/<repo-name>.git
+cd data-pipeline-project
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv venv
+source venv/bin/activate   # macOS/Linux
+venv\\Scripts\\activate      # Windows
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+(Or install manually: `pandas`, `requests`, `matplotlib`)
+
+### 4. Run the ETL pipeline
+
+```bash
+python scripts/extract.py
+python scripts/transform.py
+python scripts/load.py
+```
+
+Processed output will be generated in the `data/` directory.
+
+---
+
+## 🧹 Git & Repository Rules
+
+### Ignored by Git
+
+* `venv/`
+* `__pycache__/`
+* Temporary and OS-specific files
+
+### Not recommended to commit
+
+* Large ETL output files (CSV / JSON)
+* Credentials or API keys
+
+---
+
+## 🗑️ Cleaning Up Workflow Runs
+
+If workflow runs accumulate, they can be removed using **GitHub CLI**:
+
+```bash
+gh run list
+gh run delete <RUN_ID>
+```
+
+Bulk delete example (Git Bash):
+
+```bash
+for id in $(gh run list --limit 1000 --json databaseId --jq '.[].databaseId'); do
+  gh run delete $id
+done
+```
+
+---
+
+## 📌 Important Notes
+
+* Deleted workflow runs **cannot be restored**
+* Auto-commit should be enabled only when necessary
+* For production use, consider storing data in:
+
+  * Cloud storage (S3 / GCS)
+  * A database
+  * GitHub Actions Artifacts
+
+---
+
+## ✨ Future Improvements
+
+* Upload ETL results as **artifacts**
+* Persist data to a database
+* Add logging & monitoring
+* Notifications (Slack / Email)
+
+---
+
+## 📄 License
+
+This project is intended for learning and development purposes.
+
+---
+
+🚀 **Happy data engineering!**
+
