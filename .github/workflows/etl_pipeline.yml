@@ -1,10 +1,12 @@
-
 name: Crypto ETL Pipeline
 
 on:
   schedule:
     - cron: "0 */6 * * *"   # tiap 6 jam
   workflow_dispatch:
+
+env:
+  ENABLE_AUTO_COMMIT: "false"   # 🔴 change to "true" to enable auto-commit
 
 jobs:
   run-etl:
@@ -39,7 +41,7 @@ jobs:
       - name: Run Load
         run: python scripts/load.py
 
-      # 7. Debug (optional tapi sangat disarankan)
+      # 7. Debug data folder
       - name: Debug data folder
         run: |
           echo "Current directory:"
@@ -49,8 +51,9 @@ jobs:
           echo "Data folder:"
           ls -la data || echo "data folder not found"
 
-      # 8. Commit data folder (ANTI ERROR)
+      # 8. Commit data folder (TOGGLE ON / OFF)
       - name: Commit Data Folder
+        if: env.ENABLE_AUTO_COMMIT == 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
